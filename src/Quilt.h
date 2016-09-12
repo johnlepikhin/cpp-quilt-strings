@@ -7,7 +7,7 @@
 #include <exception>
 #include <stdexcept>
 
-#include <iostream>
+#include "Ternary.h"
 
 class NoDataHere : public std::runtime_error {
 public:
@@ -57,6 +57,10 @@ typedef std::vector<Patch> quilt;
 //lint -esym(1714,Quilt::GetSubStringOrFail)
 //lint -esym(1714,Quilt::GetShortBEOrFail)
 //lint -esym(1714,Quilt::GetShortLEOrFail)
+//lint -esym(1714,Quilt::CompareChar)
+//lint -esym(1714,Quilt::CompareShortBE)
+//lint -esym(1714,Quilt::CompareShortLE)
+//lint -esym(1714,Quilt::CompareSubString)
 //lint -esym(1790,Quilt)
 //lint -esym(1512,Quilt)
 class Quilt {
@@ -105,6 +109,11 @@ public:
 	}
 
 	std::string *GetSubStringOrFail(patch_position offset, patch_position size);
+
+	const ternary::Ternary &CompareChar(patch_position offset, const unsigned char with);
+	const ternary::Ternary &CompareShortLE(patch_position offset, const unsigned short with);
+	const ternary::Ternary &CompareShortBE(patch_position offset, const unsigned short with);
+	const ternary::Ternary &CompareSubString(patch_position offset, const std::string &with);
 };
 
 //lint -esym(1712,QuiltSnippet)

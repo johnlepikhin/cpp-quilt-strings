@@ -4,6 +4,8 @@
 #include <iostream>
 
 #include "../src/Quilt.h"
+#include "../src/Ternary.h"
+
 
 std::string *d1 = new std::string("0123456789");
 Quilt q = QuiltSnippet(d1);
@@ -93,4 +95,47 @@ TEST(sewTest, HandlesGetSubString) {
 	EXPECT_STREQ(q_sew.GetSubStringOrFail(5, 3)->c_str(), "567");
 	EXPECT_THROW(q_sew.GetSubStringOrFail(0, 11), NoDataHere);
 	EXPECT_THROW(q_sew.GetSubStringOrFail(100, 11), NoDataHere);
+}
+
+TEST(quiltTest, HandlesCompareChar) {
+	EXPECT_EQ(q.CompareChar(0, '0'), ternary::True);
+	EXPECT_EQ(q.CompareChar(0, 'z'), ternary::False);
+	EXPECT_EQ(q.CompareChar(9, '9'), ternary::True);
+	EXPECT_EQ(q.CompareChar(9, 'z'), ternary::False);
+	EXPECT_EQ(q.CompareChar(1000, '9'), ternary::Unknown);
+}
+
+TEST(quiltTest, HandlesCompareShortBE) {
+	EXPECT_EQ(q.CompareShortBE(0, 12337), ternary::True);
+	EXPECT_EQ(q.CompareShortBE(8, 14393), ternary::True);
+	EXPECT_EQ(q.CompareShortBE(9, 14649), ternary::Unknown);
+	EXPECT_EQ(q.CompareShortBE(-1, 14393), ternary::Unknown);
+	EXPECT_EQ(q.CompareShortBE(1000, 0), ternary::Unknown);
+}
+
+TEST(quiltTest, HandlesCompareShortLE) {
+	EXPECT_EQ(q.CompareShortLE(0, 12592), ternary::True);
+	EXPECT_EQ(q.CompareShortLE(8, 14648), ternary::True);
+	EXPECT_EQ(q.CompareShortLE(9, 14649), ternary::Unknown);
+	EXPECT_EQ(q.CompareShortLE(-1, 12592), ternary::Unknown);
+	EXPECT_EQ(q.CompareShortLE(1000, 0), ternary::Unknown);
+}
+
+TEST(quiltTest, HandlesCompareSubString) {
+	EXPECT_EQ(q.CompareSubString(0, ""), ternary::True);
+	EXPECT_EQ(q.CompareSubString(0, "0"), ternary::True);
+	EXPECT_EQ(q.CompareSubString(0, "01"), ternary::True);
+	EXPECT_EQ(q.CompareSubString(0, "zz"), ternary::False);
+	EXPECT_EQ(q.CompareSubString(-1, ""), ternary::True);
+
+	EXPECT_EQ(q.CompareSubString(1, ""), ternary::True);
+	EXPECT_EQ(q.CompareSubString(1, "1"), ternary::True);
+	EXPECT_EQ(q.CompareSubString(1, "12"), ternary::True);
+	EXPECT_EQ(q.CompareSubString(1, "zz"), ternary::False);
+
+	EXPECT_EQ(q.CompareSubString(8, ""), ternary::True);
+	EXPECT_EQ(q.CompareSubString(8, "8"), ternary::True);
+	EXPECT_EQ(q.CompareSubString(8, "89"), ternary::True);
+	EXPECT_EQ(q.CompareSubString(8, "89z"), ternary::Unknown);
+	EXPECT_EQ(q.CompareSubString(8, "zz"), ternary::False);
 }

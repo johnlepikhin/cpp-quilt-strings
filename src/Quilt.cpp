@@ -48,6 +48,69 @@ std::string *Quilt::GetSubStringOrFail(patch_position offset, patch_position siz
 	return (r);
 }
 
+const ternary::Ternary &Quilt::CompareChar(patch_position offset, const unsigned char with)
+{
+	Patch *p = GetPatch(offset);
+	if (p) {
+		if ((unsigned char)p->Data->at((offset-p->Begin)+p->DataBegin) == with) {
+			return (ternary::True);
+		} else {
+			return (ternary::False);
+		}
+	}
+
+	return (ternary::Unknown);
+}
+
+const ternary::Ternary &Quilt::CompareShortBE(patch_position offset, const unsigned short with) {
+	Patch *p0 = GetPatch(offset);
+	Patch *p1 = GetPatch(offset+1);
+	using namespace ternary;
+	if (!p0 || !p1) {
+		return (Unknown);
+	}
+
+	if ((unsigned char)p0->Data->at((offset-p0->Begin)+p0->DataBegin) == with >> 8
+			&& ((unsigned char)p1->Data->at((offset+1-p1->Begin)+p1->DataBegin) & 0xf) == (with & 0xf)) {
+		return (True);
+	} else {
+		return (False);
+	}
+}
+
+const ternary::Ternary &Quilt::CompareShortLE(patch_position offset, const unsigned short with) {
+	Patch *p0 = GetPatch(offset);
+	Patch *p1 = GetPatch(offset+1);
+	using namespace ternary;
+	if (!p0 || !p1) {
+		return (Unknown);
+	}
+
+	if ((unsigned char)p1->Data->at((offset+1-p1->Begin)+p1->DataBegin) == with >> 8
+			&& ((unsigned char)p0->Data->at((offset-p0->Begin)+p0->DataBegin) & 0xf) == (with & 0xf)) {
+		return (True);
+	} else {
+		return (False);
+	}
+}
+
+const ternary::Ternary &Quilt::CompareSubString(patch_position offset, const std::string &with)
+{
+	using namespace ternary;
+	try {
+		std::string *substr = GetSubStringOrFail(offset, with.length());
+		if (*substr == with) {
+			delete substr;
+			return (True);
+		} else {
+			delete substr;
+			return (False);
+		}
+	} catch (...) {
+		return (Unknown);
+	}
+}
+
 QuiltSnippet::QuiltSnippet(std::string *data)
 {
 	if (NULL == data) {

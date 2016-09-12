@@ -54,6 +54,9 @@ public:
 typedef std::vector<Patch> quilt;
 
 //lint -esym(1714,Quilt::GetCharOrFail)
+//lint -esym(1714,Quilt::GetSubStringOrFail)
+//lint -esym(1714,Quilt::GetShortBEOrFail)
+//lint -esym(1714,Quilt::GetShortLEOrFail)
 //lint -esym(1790,Quilt)
 //lint -esym(1512,Quilt)
 class Quilt {
@@ -75,11 +78,11 @@ public:
 		return (NULL);
 	}
 
-	inline char GetCharOrFail(patch_position offset)
+	inline unsigned char GetCharOrFail(patch_position offset)
 	{
 		Patch *p = GetPatch(offset);
 		if (p) {
-			return (p->Data->at((offset-p->Begin)+p->DataBegin));
+			return ((unsigned char)p->Data->at((offset-p->Begin)+p->DataBegin));
 		} else {
 			throw NoDataHere();
 		}
@@ -87,9 +90,7 @@ public:
 
 	inline unsigned short GetShortBEOrFail(patch_position offset)
 	{
-		unsigned short r = 0;
-
-		r = GetCharOrFail(offset) << 8;
+		unsigned short r = GetCharOrFail(offset) << 8;
 		r += GetCharOrFail(offset+1);
 
 		return (r);
@@ -97,9 +98,7 @@ public:
 
 	inline unsigned short GetShortLEOrFail(patch_position offset)
 	{
-		unsigned short r = 0;
-
-		r = GetCharOrFail(offset+1) << 8;
+		unsigned short r = GetCharOrFail(offset+1) << 8;
 		r += GetCharOrFail(offset);
 
 		return (r);

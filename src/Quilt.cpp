@@ -138,6 +138,14 @@ QuiltSnippet::QuiltSnippet(const std::string &data)
 	Data.push_back(p);
 }
 
+QuiltSnippet::QuiltSnippet(const std::string &data, const patch_position length)
+	: Quilt(length, data.length())
+{
+	const Patch *p = new Patch(0, data.length(), data, 0);
+	Data.push_back(p);
+}
+
+
 void QuiltCut::Cut(const Quilt &origin, const patch_position offset, const patch_position length)
 {
 	patch_position cut_endpos = offset+length;

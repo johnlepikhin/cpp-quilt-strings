@@ -125,6 +125,7 @@ public:
 class QuiltSnippet : public Quilt {
 public:
 	QuiltSnippet(const std::string &data);
+	QuiltSnippet(const std::string &data, const patch_position length);
 };
 
 //lint -esym(1712,QuiltCut)

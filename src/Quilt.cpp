@@ -129,7 +129,7 @@ QuiltSnippet::QuiltSnippet(std::string *data)
 	Data.push_back(p);
 }
 
-QuiltCut::QuiltCut(Quilt *origin, patch_position offset, patch_position length)
+void QuiltCut::Cut(Quilt *origin, patch_position offset, patch_position length)
 {
 	Length = length;
 	CoveredSize = 0;
@@ -182,7 +182,17 @@ QuiltCut::QuiltCut(Quilt *origin, patch_position offset, patch_position length)
 			}
 		}
 	}
+}
 
+QuiltCut::QuiltCut(Quilt *origin, patch_position offset, patch_position length)
+{
+	this->Cut(origin, offset, length);
+}
+
+QuiltCut::QuiltCut(Quilt *origin, patch_position offset)
+{
+	patch_position length = origin->CoveredSize-offset;
+	this->Cut(origin, offset, length);
 }
 
 QuiltSew::QuiltSew(patch_position length)

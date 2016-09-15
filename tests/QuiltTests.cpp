@@ -47,6 +47,13 @@ TEST(cutTest, HandlesNormalCut) {
 	EXPECT_THROW(q_cut.GetCharOrFail(10), NoDataHere);
 }
 
+TEST(cutTest, HandlesCutToEnd) {
+	Quilt q_cut = QuiltCut(&q, 5);
+	EXPECT_EQ(q_cut.GetCharOrFail(0), '5');
+	EXPECT_EQ(q_cut.GetCharOrFail(4), '9');
+	EXPECT_THROW(q_cut.GetCharOrFail(10), NoDataHere);
+}
+
 TEST(cutTest, HandlesOutOfRangeCut) {
 	Quilt q_cut = QuiltCut(&q, 200, 10);
 	EXPECT_THROW(q_cut.GetCharOrFail(0), NoDataHere);

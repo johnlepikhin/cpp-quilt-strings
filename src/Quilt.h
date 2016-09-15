@@ -129,6 +129,9 @@ public:
 class QuiltCut : public Quilt {
 public:
 	QuiltCut(Quilt *origin, patch_position offset, patch_position length);
+	QuiltCut(Quilt *origin, patch_position offset);
+private:
+	void Cut(Quilt *origin, patch_position offset, patch_position length);
 };
 
 //lint -esym(1712,QuiltSew)

@@ -109,6 +109,7 @@ public:
 	}
 
 	std::string *GetSubStringOrFail(patch_position offset, patch_position size);
+	void CopyBytesOrFail(char *buffer, patch_position offset, patch_position size);
 
 	const ternary::Ternary &CompareChar(patch_position offset, const unsigned char with);
 	const ternary::Ternary &CompareShortLE(patch_position offset, const unsigned short with);

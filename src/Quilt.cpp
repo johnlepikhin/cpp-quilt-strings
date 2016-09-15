@@ -1,17 +1,15 @@
 
 #include "Quilt.h"
 
-std::string *Quilt::GetSubStringOrFail(patch_position offset, patch_position size)
+void Quilt::CopyBytesOrFail(char *buffer, patch_position offset, patch_position size)
 {
-	std::string *r = new std::string();
-	r->resize(size);
+	if (0 == size) {
+		return;
+	}
+
 	patch_position end_offset = offset + size;
 
 	patch_position copied = 0;
-
-	if (0 == size) {
-		return (r);
-	}
 
 	for (quilt::iterator it = Data.begin(); it != Data.end(); ++it) {
 		patch_position end_patch_offset = (*it).Begin + (*it).Length;
@@ -20,22 +18,22 @@ std::string *Quilt::GetSubStringOrFail(patch_position offset, patch_position siz
 			// substring begins inside this patch
 			if ((*it).Begin <= end_offset && end_offset < end_patch_offset) {
 				// substring is just a part of this patch
-				r->replace(0, size, *((*it).Data), offset_in_patch+(*it).DataBegin, size);
-				return (r);
+				(*it).Data->copy(buffer, size, offset_in_patch+(*it).DataBegin);
+				return;
 			} else {
 				patch_position sublen = (*it).Length-offset_in_patch;
-				r->replace(0, sublen, *((*it).Data), offset_in_patch+(*it).DataBegin, sublen);
+				(*it).Data->copy(buffer, sublen, offset_in_patch+(*it).DataBegin);
 				copied += sublen;
 			}
 		} else if (offset < (*it).Begin) {
 			if (end_offset >= end_patch_offset) {
 				// all bytes of this patch are part of substring
-				r->replace((*it).Begin-offset, (*it).Length, *((*it).Data), (*it).DataBegin, (*it).Length);
+				(*it).Data->copy(buffer+(*it).Begin-offset, (*it).Length, (*it).DataBegin);
 				copied += (*it).Length;
 			} else {
 				// substring ends in this patch
 				patch_position sublen = end_offset-(*it).Begin;
-				r->replace((*it).Begin-offset, sublen, *((*it).Data), (*it).DataBegin, sublen);
+				(*it).Data->copy(buffer+(*it).Begin-offset, sublen, (*it).DataBegin);
 				copied += sublen;
 			}
 		}
@@ -44,6 +42,15 @@ std::string *Quilt::GetSubStringOrFail(patch_position offset, patch_position siz
 	if (copied != size) {
 		throw NoDataHere();
 	}
+}
+
+std::string *Quilt::GetSubStringOrFail(patch_position offset, patch_position size)
+{
+	char buf[size];
+
+	CopyBytesOrFail(buf, offset, size);
+
+	std::string *r = new std::string(buf, size);
 
 	return (r);
 }

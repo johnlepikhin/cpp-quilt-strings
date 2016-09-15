@@ -7,7 +7,7 @@
 #include "../src/Ternary.h"
 
 
-std::string *d1 = new std::string("0123456789");
+std::string d1 = std::string("0123456789");
 Quilt q = QuiltSnippet(d1);
 
 TEST(snippetTest, HandlesSimpleCreate) {
@@ -18,9 +18,9 @@ TEST(snippetTest, HandlesSimpleCreate) {
 	EXPECT_THROW(q.GetCharOrFail(10), NoDataHere);
 }
 
-TEST(snippetTest, HandlesNULLCreate) {
-	EXPECT_THROW(QuiltSnippet(0), std::invalid_argument);
-}
+//TEST(snippetTest, HandlesNULLCreate) {
+//	EXPECT_THROW(QuiltSnippet(0), std::invalid_argument);
+//}
 
 TEST(snippetTest, HandlesGetShortBE) {
 	EXPECT_EQ(q.GetShortBEOrFail(0), 12337);
@@ -41,26 +41,26 @@ TEST(snippetTest, HandlesGetSubString) {
 }
 
 TEST(cutTest, HandlesNormalCut) {
-	Quilt q_cut = QuiltCut(&q, 5, 10);
+	Quilt q_cut = QuiltCut(q, 5, 10);
 	EXPECT_EQ(q_cut.GetCharOrFail(0), '5');
 	EXPECT_EQ(q_cut.GetCharOrFail(4), '9');
 	EXPECT_THROW(q_cut.GetCharOrFail(10), NoDataHere);
 }
 
 TEST(cutTest, HandlesCutToEnd) {
-	Quilt q_cut = QuiltCut(&q, 5);
+	Quilt q_cut = QuiltCut(q, 5);
 	EXPECT_EQ(q_cut.GetCharOrFail(0), '5');
 	EXPECT_EQ(q_cut.GetCharOrFail(4), '9');
 	EXPECT_THROW(q_cut.GetCharOrFail(10), NoDataHere);
 }
 
 TEST(cutTest, HandlesOutOfRangeCut) {
-	Quilt q_cut = QuiltCut(&q, 200, 10);
+	Quilt q_cut = QuiltCut(q, 200, 10);
 	EXPECT_THROW(q_cut.GetCharOrFail(0), NoDataHere);
 }
 
 TEST(cutTest, HandlesSubString) {
-	Quilt q_cut = QuiltCut(&q, 5, 10);
+	Quilt q_cut = QuiltCut(q, 5, 10);
 
 	EXPECT_STREQ(q_cut.GetSubStringOrFail(0, 0)->c_str(), "");
 	EXPECT_STREQ(q_cut.GetSubStringOrFail(0, 1)->c_str(), "5");
@@ -72,11 +72,11 @@ TEST(cutTest, HandlesSubString) {
 }
 
 TEST(sewTest, HandlesNormalSew) {
-	Quilt q_cut1 = QuiltCut(&q, 5, 10);
-	Quilt q_cut2 = QuiltCut(&q, 7, 10);
+	Quilt q_cut1 = QuiltCut(q, 5, 10);
+	Quilt q_cut2 = QuiltCut(q, 7, 10);
 	QuiltSew q_sew = QuiltSew(20);
-	q_sew.Sew(&q_cut1, 0);
-	q_sew.Sew(&q_cut2, 10);
+	q_sew.Sew(q_cut1, 0);
+	q_sew.Sew(q_cut2, 10);
 
 	EXPECT_EQ(q_sew.GetCharOrFail(0), '5');
 	EXPECT_EQ(q_sew.GetCharOrFail(4), '9');
@@ -87,11 +87,11 @@ TEST(sewTest, HandlesNormalSew) {
 }
 
 TEST(sewTest, HandlesGetSubString) {
-	Quilt q_cut1 = QuiltCut(&q, 0, 5);
-	Quilt q_cut2 = QuiltCut(&q, 5, 5);
+	Quilt q_cut1 = QuiltCut(q, 0, 5);
+	Quilt q_cut2 = QuiltCut(q, 5, 5);
 	QuiltSew q_sew = QuiltSew(10);
-	q_sew.Sew(&q_cut1, 0);
-	q_sew.Sew(&q_cut2, 5);
+	q_sew.Sew(q_cut1, 0);
+	q_sew.Sew(q_cut2, 5);
 
 	EXPECT_STREQ(q_sew.GetSubStringOrFail(0, 0)->c_str(), "");
 	EXPECT_STREQ(q_sew.GetSubStringOrFail(0, 1)->c_str(), "0");

@@ -46,11 +46,9 @@ void Quilt::CopyBytesOrFail(char *buffer, patch_position offset, patch_position 
 
 std::string *Quilt::GetSubStringOrFail(patch_position offset, patch_position size)
 {
-	char buf[size];
-
-	CopyBytesOrFail(buf, offset, size);
-
-	std::string *r = new std::string(buf, size);
+	std::string *r = new std::string();
+	r->resize(size);
+	CopyBytesOrFail((char *)r->data(), offset, size);
 
 	return (r);
 }

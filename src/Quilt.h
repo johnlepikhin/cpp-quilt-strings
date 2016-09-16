@@ -25,17 +25,32 @@ public:
 
 typedef unsigned long int patch_position;
 
+class PatchContent {
+private:
+	int RefCounter;
+	const std::string *Content;
+public:
+	PatchContent(const std::string *content);
+	~PatchContent();
+	inline const std::string *Get()
+	{
+		return (Content);
+	};
+	void StartUse();
+	int StopUse();
+};
+
 //lint -esym(1712,Patch)
 class Patch {
 public:
 	const patch_position Begin;
 	const patch_position Length;
-	const std::string *Data;
+	PatchContent *Data;
 	const patch_position DataBegin;
 	Patch(
 			const patch_position begin,
 			const patch_position length,
-			const std::string *data,
+			PatchContent *data,
 			const patch_position data_begin
 	)
 	: Begin(begin)
@@ -43,6 +58,15 @@ public:
 	, Data(data)
 	, DataBegin(data_begin)
 	{
+		Data->StartUse();
+	}
+
+	~Patch()
+	{
+		if (!Data->StopUse())
+		{
+			delete Data;
+		}
 	}
 
 	Patch *Copy() const
@@ -90,7 +114,7 @@ public:
 	{
 		const Patch *p = GetPatch(offset);
 		if (p) {
-			return ((unsigned char)p->Data->at((offset-p->Begin)+p->DataBegin));
+			return ((unsigned char)p->Data->Get()->at((offset-p->Begin)+p->DataBegin));
 		} else {
 			throw NoDataHere();
 		}
@@ -120,11 +144,11 @@ public:
 	const ternary::Ternary &CompareShortBE(patch_position offset, const unsigned short with) const;
 	const ternary::Ternary &CompareSubString(patch_position offset, const std::string &with) const;
 protected:
-	void AddPatch(const Patch *p);
+	void AddPatch(Patch *p);
 	void AddNewPatch(
 			const patch_position begin,
 			const patch_position length,
-			const std::string *data,
+			PatchContent *data,
 			const patch_position data_begin);
 };
 
@@ -140,10 +164,10 @@ public:
 //lint -esym(1509,QuiltCut)
 class QuiltCut : public Quilt {
 public:
-	QuiltCut(const Quilt &origin, const patch_position offset, const patch_position length);
-	QuiltCut(const Quilt &origin, const patch_position offset);
+	QuiltCut(const Quilt *origin, const patch_position offset, const patch_position length);
+	QuiltCut(const Quilt *origin, const patch_position offset);
 private:
-	void Cut(const Quilt &origin, const patch_position offset, const patch_position length);
+	void Cut(const Quilt *origin, const patch_position offset, const patch_position length);
 };
 
 //lint -esym(1712,QuiltSew)
@@ -151,7 +175,7 @@ private:
 class QuiltSew : public Quilt {
 public:
 	QuiltSew(const patch_position length);
-	void Sew(const Quilt &origin, const patch_position offset);
+	void Sew(const Quilt *origin, const patch_position offset);
 };
 
 #endif /* SRC_QUILT_H_ */

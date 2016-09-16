@@ -1,6 +1,16 @@
 #include <gtest/gtest.h>
+#include "shared.h"
 
 int main(int argc, char **argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-  return (RUN_ALL_TESTS());
+	quilt_data1 = new std::string("0123456789");
+	quilt1 = new QuiltSnippet(quilt_data1);
+
+	::testing::InitGoogleTest(&argc, argv);
+
+	int r = RUN_ALL_TESTS();
+
+	delete quilt1;
+	delete quilt_data1;
+
+	return (r);
 }

@@ -12,8 +12,12 @@ PatchContent::PatchContent(const std::string *content)
 PatchContent::~PatchContent()
 {
 	RefCounter--;
-	if (!RefCounter)
-		delete Content;
+	try {
+		if (!RefCounter && NULL != Content)
+			delete Content;
+	} catch (...) {
+
+	}
 }
 
 void PatchContent::StartUse()
@@ -42,13 +46,17 @@ Quilt::Quilt(const patch_position length, const patch_position coveredSize)
 
 Quilt::~Quilt()
 {
-	for (quilt::const_iterator it = Data.begin(); it != Data.end(); ++it) {
-		if (*it)
-			delete (*it);
+	try {
+		for (quilt::const_iterator it = Data.begin(); it != Data.end(); ++it) {
+			if (*it)
+				delete (*it);
+		}
+	} catch (...) {
+
 	}
 }
 
-void Quilt::AddPatch(Patch *p)
+void Quilt::AddPatch(const Patch *p)
 {
 	Data.push_back(p);
 }

@@ -32,7 +32,7 @@ private:
 public:
 	PatchContent(const std::string *content);
 	~PatchContent();
-	inline const std::string *Get()
+	inline const std::string *Get() const
 	{
 		return (Content);
 	};
@@ -63,9 +63,12 @@ public:
 
 	~Patch()
 	{
-		if (!Data->StopUse())
-		{
-			delete Data;
+		try {
+			if (!Data->StopUse())
+			{
+				delete Data;
+			}
+		} catch (...) {
 		}
 	}
 
@@ -144,7 +147,7 @@ public:
 	const ternary::Ternary &CompareShortBE(patch_position offset, const unsigned short with) const;
 	const ternary::Ternary &CompareSubString(patch_position offset, const std::string &with) const;
 protected:
-	void AddPatch(Patch *p);
+	void AddPatch(const Patch *p);
 	void AddNewPatch(
 			const patch_position begin,
 			const patch_position length,

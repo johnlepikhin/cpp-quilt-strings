@@ -14,6 +14,21 @@ Quilt::Quilt(const patch_position length, const patch_position coveredSize)
 
 }
 
+void Quilt::AddPatch(const Patch *p)
+{
+	Data.push_back(p);
+}
+
+void Quilt::AddNewPatch(
+		const patch_position begin,
+		const patch_position length,
+		const std::string *data,
+		const patch_position data_begin)
+{
+	const Patch *p = new Patch(begin, length, data, data_begin);
+	AddPatch(p);
+}
+
 void Quilt::CopyBytesOrFail(char *buffer, patch_position offset, patch_position size) const
 {
 	if (0 == size) {
@@ -31,22 +46,22 @@ void Quilt::CopyBytesOrFail(char *buffer, patch_position offset, patch_position 
 			// substring begins inside this patch
 			if ((*it)->Begin <= end_offset && end_offset < end_patch_offset) {
 				// substring is just a part of this patch
-				(*it)->Data.copy(buffer, size, offset_in_patch+(*it)->DataBegin);
+				(*it)->Data->copy(buffer, size, offset_in_patch+(*it)->DataBegin);
 				return;
 			} else {
 				patch_position sublen = (*it)->Length-offset_in_patch;
-				(*it)->Data.copy(buffer, sublen, offset_in_patch+(*it)->DataBegin);
+				(*it)->Data->copy(buffer, sublen, offset_in_patch+(*it)->DataBegin);
 				copied += sublen;
 			}
 		} else if (offset < (*it)->Begin) {
 			if (end_offset >= end_patch_offset) {
 				// all bytes of this patch are part of substring
-				(*it)->Data.copy(buffer+(*it)->Begin-offset, (*it)->Length, (*it)->DataBegin);
+				(*it)->Data->copy(buffer+(*it)->Begin-offset, (*it)->Length, (*it)->DataBegin);
 				copied += (*it)->Length;
 			} else {
 				// substring ends in this patch
 				patch_position sublen = end_offset-(*it)->Begin;
-				(*it)->Data.copy(buffer+(*it)->Begin-offset, sublen, (*it)->DataBegin);
+				(*it)->Data->copy(buffer+(*it)->Begin-offset, sublen, (*it)->DataBegin);
 				copied += sublen;
 			}
 		}
@@ -61,7 +76,7 @@ std::string *Quilt::GetSubStringOrFail(const patch_position offset, const patch_
 {
 	std::string *r = new std::string();
 	r->resize(size);
-	CopyBytesOrFail((char *)r->data(), offset, size);
+	CopyBytesOrFail(const_cast<char *>(r->data()), offset, size);
 
 	return (r);
 }
@@ -70,7 +85,7 @@ const ternary::Ternary &Quilt::CompareChar(const patch_position offset, const un
 {
 	const Patch *p = GetPatch(offset);
 	if (p) {
-		if ((unsigned char)p->Data.at((offset-p->Begin)+p->DataBegin) == with) {
+		if ((unsigned char)p->Data->at((offset-p->Begin)+p->DataBegin) == with) {
 			return (ternary::True);
 		} else {
 			return (ternary::False);
@@ -89,8 +104,8 @@ const ternary::Ternary &Quilt::CompareShortBE(const patch_position offset, const
 		return (Unknown);
 	}
 
-	if ((unsigned char)p0->Data.at((offset-p0->Begin)+p0->DataBegin) == with >> 8
-			&& ((unsigned char)p1->Data.at((offset+1-p1->Begin)+p1->DataBegin) & 0xf) == (with & 0xf)) {
+	if ((unsigned char)p0->Data->at((offset-p0->Begin)+p0->DataBegin) == with >> 8
+			&& ((unsigned char)p1->Data->at((offset+1-p1->Begin)+p1->DataBegin) & 0xf) == (with & 0xf)) {
 		return (True);
 	} else {
 		return (False);
@@ -106,8 +121,8 @@ const ternary::Ternary &Quilt::CompareShortLE(const patch_position offset, const
 		return (Unknown);
 	}
 
-	if ((unsigned char)p1->Data.at((offset+1-p1->Begin)+p1->DataBegin) == with >> 8
-			&& ((unsigned char)p0->Data.at((offset-p0->Begin)+p0->DataBegin) & 0xf) == (with & 0xf)) {
+	if ((unsigned char)p1->Data->at((offset+1-p1->Begin)+p1->DataBegin) == with >> 8
+			&& ((unsigned char)p0->Data->at((offset-p0->Begin)+p0->DataBegin) & 0xf) == (with & 0xf)) {
 		return (True);
 	} else {
 		return (False);
@@ -131,18 +146,16 @@ const ternary::Ternary &Quilt::CompareSubString(patch_position offset, const std
 	}
 }
 
-QuiltSnippet::QuiltSnippet(const std::string &data)
-	: Quilt(data.length(), data.length())
+QuiltSnippet::QuiltSnippet(const std::string *data)
+	: Quilt(data->length(), data->length())
 {
-	const Patch *p = new Patch(0, data.length(), data, 0);
-	Data.push_back(p);
+	AddNewPatch(0, data->length(), data, 0);
 }
 
-QuiltSnippet::QuiltSnippet(const std::string &data, const patch_position length)
-	: Quilt(length, data.length())
+QuiltSnippet::QuiltSnippet(const std::string *data, const patch_position length)
+	: Quilt(length, data->length())
 {
-	const Patch *p = new Patch(0, data.length(), data, 0);
-	Data.push_back(p);
+	AddNewPatch(0, data->length(), data, 0);
 }
 
 
@@ -159,12 +172,11 @@ void QuiltCut::Cut(const Quilt &origin, const patch_position offset, const patch
 				if (cut_endpos < patch_endpos) {
 					// Cut ends in this patch
 					patch_position patch_length = cut_endpos-(*it)->Begin;
-					const Patch *p = new Patch((*it)->Begin, patch_length, (*it)->Data, (*it)->DataBegin);
-					Data.push_back(p);
+					AddNewPatch((*it)->Begin, patch_length, (*it)->Data, (*it)->DataBegin);
 					CoveredSize += patch_length;
 				} else {
 					// This patch is in the middle of cut, copy it
-					Data.push_back(*it);
+					AddPatch((*it)->Copy());
 					CoveredSize += (*it)->Length;
 				}
 			} else {
@@ -173,7 +185,7 @@ void QuiltCut::Cut(const Quilt &origin, const patch_position offset, const patch
 		} else {
 			if (offset == (*it)->Begin && cut_endpos == patch_endpos) {
 				// This patch is equal to cut
-				Data.push_back(*it);
+				AddPatch((*it)->Copy());
 				CoveredSize += (*it)->Length;
 			} else {
 				if (offset < patch_endpos) {
@@ -181,13 +193,11 @@ void QuiltCut::Cut(const Quilt &origin, const patch_position offset, const patch
 
 					if (cut_endpos < patch_endpos) {
 						// Cut is substring of this patch
-						const Patch *p = new Patch(0, length, (*it)->Data, (offset-(*it)->Begin)+(*it)->DataBegin);
-						Data.push_back(p);
+						AddNewPatch(0, length, (*it)->Data, (offset-(*it)->Begin)+(*it)->DataBegin);
 						CoveredSize += length;
 					} else {
 						// Cut continues after this patch
-						const Patch *p = new Patch(0, patch_endpos-offset, (*it)->Data, (offset-(*it)->Begin)+(*it)->DataBegin);
-						Data.push_back(p);
+						AddNewPatch(0, patch_endpos-offset, (*it)->Data, (offset-(*it)->Begin)+(*it)->DataBegin);
 						CoveredSize += patch_endpos-offset;
 					}
 				} else {
@@ -219,8 +229,7 @@ QuiltSew::QuiltSew(const patch_position length)
 void QuiltSew::Sew(const Quilt &origin, const patch_position offset)
 {
 	for (quilt::const_iterator it = origin.Data.begin(); it != origin.Data.end(); ++it) {
-		const Patch *p = new Patch((*it)->Begin+offset, (*it)->Length, (*it)->Data, (*it)->DataBegin);
-		Data.push_back(p);
+		AddNewPatch((*it)->Begin+offset, (*it)->Length, (*it)->Data, (*it)->DataBegin);
 	}
 	CoveredSize += origin.CoveredSize;
 }

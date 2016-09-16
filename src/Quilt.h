@@ -30,12 +30,12 @@ class Patch {
 public:
 	const patch_position Begin;
 	const patch_position Length;
-	const std::string Data;
+	const std::string *Data;
 	const patch_position DataBegin;
 	Patch(
 			const patch_position begin,
 			const patch_position length,
-			const std::string &data,
+			const std::string *data,
 			const patch_position data_begin
 	)
 	: Begin(begin)
@@ -45,9 +45,9 @@ public:
 	{
 	}
 
-	Patch Copy() const
+	Patch *Copy() const
 	{
-		return (Patch(Begin, Length, Data, DataBegin));
+		return (new Patch(Begin, Length, Data, DataBegin));
 	}
 };
 
@@ -63,6 +63,7 @@ typedef std::vector<const Patch *> quilt;
 //lint -esym(1714,Quilt::CompareSubString)
 //lint -esym(1790,Quilt)
 //lint -esym(1512,Quilt)
+//lint -sem(Quilt::AddPatch, 1p, custodial(1))
 class Quilt {
 public:
 	quilt Data;
@@ -72,7 +73,7 @@ public:
 	Quilt();
 	Quilt(const patch_position length, const patch_position coveredSize);
 
-	~Quilt() {};
+	~Quilt();
 
 	inline const Patch *GetPatch(patch_position offset) const
 	{
@@ -89,7 +90,7 @@ public:
 	{
 		const Patch *p = GetPatch(offset);
 		if (p) {
-			return ((unsigned char)p->Data.at((offset-p->Begin)+p->DataBegin));
+			return ((unsigned char)p->Data->at((offset-p->Begin)+p->DataBegin));
 		} else {
 			throw NoDataHere();
 		}
@@ -118,14 +119,21 @@ public:
 	const ternary::Ternary &CompareShortLE(patch_position offset, const unsigned short with) const;
 	const ternary::Ternary &CompareShortBE(patch_position offset, const unsigned short with) const;
 	const ternary::Ternary &CompareSubString(patch_position offset, const std::string &with) const;
+protected:
+	void AddPatch(const Patch *p);
+	void AddNewPatch(
+			const patch_position begin,
+			const patch_position length,
+			const std::string *data,
+			const patch_position data_begin);
 };
 
 //lint -esym(1712,QuiltSnippet)
 //lint -esym(1509,QuiltSnippet)
 class QuiltSnippet : public Quilt {
 public:
-	QuiltSnippet(const std::string &data);
-	QuiltSnippet(const std::string &data, const patch_position length);
+	QuiltSnippet(const std::string *data);
+	QuiltSnippet(const std::string *data, const patch_position length);
 };
 
 //lint -esym(1712,QuiltCut)

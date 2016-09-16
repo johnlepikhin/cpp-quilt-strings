@@ -10,7 +10,6 @@ int main(int argc, char **argv) {
 	int r = RUN_ALL_TESTS();
 
 	delete quilt1;
-	delete quilt_data1;
 
 	return (r);
 }

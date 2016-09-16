@@ -64,7 +64,7 @@ public:
 	~Patch()
 	{
 		try {
-			if (!Data->StopUse())
+			if (Data && !Data->StopUse())
 			{
 				delete Data;
 			}

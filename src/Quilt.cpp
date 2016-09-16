@@ -11,7 +11,6 @@ PatchContent::PatchContent(const std::string *content)
 
 PatchContent::~PatchContent()
 {
-	RefCounter--;
 	try {
 		if (!RefCounter && NULL != Content)
 			delete Content;

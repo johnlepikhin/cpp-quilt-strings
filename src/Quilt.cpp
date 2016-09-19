@@ -269,16 +269,38 @@ QuiltCut::QuiltCut(const Quilt *origin, const patch_position offset)
 	this->Cut(origin, offset, length);
 }
 
+QuiltSew::QuiltSew()
+{
+	Length = 0;
+	CoveredSize = 0;
+}
+
 QuiltSew::QuiltSew(const patch_position length)
 {
 	Length = length;
 	CoveredSize = 0;
 }
 
-void QuiltSew::Sew(const Quilt *origin, const patch_position offset)
+void QuiltSew::Sew(const Quilt *origin, const patch_position offset, const bool resize)
 {
 	for (quilt::const_iterator it = origin->Data.begin(); it != origin->Data.end(); ++it) {
 		AddNewPatch((*it)->Begin+offset, (*it)->Length, (*it)->Data, (*it)->DataBegin);
+		const patch_position newLength = (*it)->Begin+offset+(*it)->Length;
+		if (resize && newLength > Length) {
+			Length = newLength;
+		}
+	}
+	CoveredSize += origin->CoveredSize;
+}
+
+void QuiltSew::SewWithHole(const Quilt *origin, const patch_position offset, const patch_position length)
+{
+	for (quilt::const_iterator it = origin->Data.begin(); it != origin->Data.end(); ++it) {
+		AddNewPatch((*it)->Begin+offset, (*it)->Length, (*it)->Data, (*it)->DataBegin);
+		const patch_position newLength = (*it)->Begin+offset+length;
+		if (newLength > Length) {
+			Length = newLength;
+		}
 	}
 	CoveredSize += origin->CoveredSize;
 }

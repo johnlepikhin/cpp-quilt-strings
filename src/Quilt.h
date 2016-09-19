@@ -177,8 +177,10 @@ private:
 //lint -esym(1509,QuiltSew)
 class QuiltSew : public Quilt {
 public:
+	QuiltSew();
 	QuiltSew(const patch_position length);
-	void Sew(const Quilt *origin, const patch_position offset);
+	void Sew(const Quilt *origin, const patch_position offset, const bool resize);
+	void SewWithHole(const Quilt *origin, const patch_position offset, const patch_position length);
 };
 
 #endif /* SRC_QUILT_H_ */

@@ -108,8 +108,8 @@ TEST(sewTest, HandlesNormalSew) {
 	Quilt *q_cut1 = new QuiltCut(quilt1, 5, 10);
 	Quilt *q_cut2 = new QuiltCut(quilt1, 7, 10);
 	QuiltSew q_sew = QuiltSew(20);
-	q_sew.Sew(q_cut1, 0);
-	q_sew.Sew(q_cut2, 10);
+	q_sew.Sew(q_cut1, 0, false);
+	q_sew.Sew(q_cut2, 10, false);
 
 	delete q_cut1;
 	delete q_cut2;
@@ -122,12 +122,29 @@ TEST(sewTest, HandlesNormalSew) {
 	EXPECT_THROW(q_sew.GetCharOrFail(13), NoDataHere);
 }
 
+TEST(sewTest, HandlesResize) {
+	Quilt *q_cut1 = new QuiltCut(quilt1, 5, 10);
+	Quilt *q_cut2 = new QuiltCut(quilt1, 7, 10);
+	QuiltSew q_sew = QuiltSew(0);
+
+	q_sew.Sew(q_cut1, 0, false);
+	EXPECT_EQ(q_sew.Length, 0);
+
+	q_sew.Sew(q_cut1, 0, true);
+	EXPECT_EQ(q_sew.Length, 5);
+
+	q_sew.SewWithHole(q_cut2, 10000, 10);
+	EXPECT_EQ(q_sew.Length, 10010);
+
+	delete q_cut1;
+	delete q_cut2;
+}
 TEST(sewTest, HandlesGetSubString) {
 	Quilt *q_cut1 = new QuiltCut(quilt1, 0, 5);
 	Quilt *q_cut2 = new QuiltCut(quilt1, 5, 5);
 	QuiltSew q_sew = QuiltSew(10);
-	q_sew.Sew(q_cut1, 0);
-	q_sew.Sew(q_cut2, 5);
+	q_sew.Sew(q_cut1, 0, false);
+	q_sew.Sew(q_cut2, 5, false);
 
 	delete q_cut1;
 	delete q_cut2;

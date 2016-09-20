@@ -58,21 +58,23 @@ TEST(snippetTest, HandlesGetSubString) {
 }
 
 TEST(cutTest, HandlesNormalCut) {
-	const Quilt &q_cut = QuiltCut(quilt1, 5, 10);
-	EXPECT_EQ(q_cut.GetCharOrFail(0), '5');
-	EXPECT_EQ(q_cut.GetCharOrFail(4), '9');
-	EXPECT_THROW(q_cut.GetCharOrFail(10), NoDataHere);
+	Quilt *q_cut = new QuiltCut(quilt1, 5, 10);
+	EXPECT_EQ(q_cut->GetCharOrFail(0), '5');
+	EXPECT_EQ(q_cut->GetCharOrFail(4), '9');
+	EXPECT_THROW(q_cut->GetCharOrFail(10), NoDataHere);
+
+	delete q_cut;
 }
 
 TEST(cutTest, HandlesCutToEnd) {
-	const Quilt &q_cut = QuiltCut(quilt1, 5);
-	EXPECT_EQ(q_cut.GetCharOrFail(0), '5');
-	EXPECT_EQ(q_cut.GetCharOrFail(4), '9');
-	EXPECT_THROW(q_cut.GetCharOrFail(10), NoDataHere);
+	Quilt *q_cut = new QuiltCut(quilt1, 5);
+	EXPECT_EQ(q_cut->GetCharOrFail(0), '5');
+	EXPECT_EQ(q_cut->GetCharOrFail(4), '9');
+	EXPECT_THROW(q_cut->GetCharOrFail(10), NoDataHere);
 }
 
 TEST(cutTest, HandlesOutOfRangeCut) {
-	const Quilt &q_cut = QuiltCut(quilt1, 200, 10);
+	Quilt q_cut = QuiltCut(quilt1, 200, 10);
 	EXPECT_THROW(q_cut.GetCharOrFail(0), NoDataHere);
 }
 

@@ -78,7 +78,7 @@ public:
 	}
 };
 
-typedef std::vector<const Patch *> quilt;
+typedef std::vector<Patch *> quilt;
 
 //lint -esym(1714,Quilt::GetCharOrFail)
 //lint -esym(1714,Quilt::GetSubStringOrFail)
@@ -96,16 +96,26 @@ public:
 	quilt Data;
 	patch_position Length;
 	patch_position CoveredSize;
+	Patch *CachedPatch;
+	patch_position CachedPatchBegin;
+	patch_position CachedPatchEnd;
 
 	Quilt();
 	Quilt(const patch_position length, const patch_position coveredSize);
 
 	~Quilt();
 
-	inline const Patch *GetPatch(patch_position offset) const
+	Patch *GetPatch(patch_position offset)
 	{
-		for (quilt::const_iterator it = Data.begin(); it != Data.end(); ++it) {
+		if (offset >= CachedPatchBegin && offset < CachedPatchEnd)
+			return (CachedPatch);
+
+		for (quilt::iterator it = Data.begin(); it != Data.end(); ++it) {
 			if ((*it)->Begin <= offset && (*it)->Begin + (*it)->Length > offset) {
+				CachedPatch = (*it);
+				CachedPatchBegin = (*it)->Begin;
+				CachedPatchEnd = CachedPatchBegin + (*it)->Length;
+
 				return (*it);
 			}
 		}
@@ -113,7 +123,7 @@ public:
 		return (NULL);
 	}
 
-	inline unsigned char GetCharOrFail(patch_position offset) const
+	inline unsigned char GetCharOrFail(patch_position offset)
 	{
 		const Patch *p = GetPatch(offset);
 		if (p) {
@@ -123,7 +133,7 @@ public:
 		}
 	}
 
-	inline unsigned short GetShortBEOrFail(patch_position offset) const
+	inline unsigned short GetShortBEOrFail(patch_position offset)
 	{
 		unsigned short r = GetCharOrFail(offset) << 8;
 		r += GetCharOrFail(offset+1);
@@ -131,7 +141,7 @@ public:
 		return (r);
 	}
 
-	inline unsigned short GetShortLEOrFail(patch_position offset) const
+	inline unsigned short GetShortLEOrFail(patch_position offset)
 	{
 		unsigned short r = GetCharOrFail(offset+1) << 8;
 		r += GetCharOrFail(offset);
@@ -142,12 +152,12 @@ public:
 	std::string *GetSubStringOrFail(const patch_position offset, const patch_position size) const;
 	void CopyBytesOrFail(char *buffer, const patch_position offset, const patch_position size) const;
 
-	const ternary::Ternary &CompareChar(patch_position offset, const unsigned char with) const;
-	const ternary::Ternary &CompareShortLE(patch_position offset, const unsigned short with) const;
-	const ternary::Ternary &CompareShortBE(patch_position offset, const unsigned short with) const;
+	const ternary::Ternary &CompareChar(patch_position offset, const unsigned char with);
+	const ternary::Ternary &CompareShortLE(patch_position offset, const unsigned short with);
+	const ternary::Ternary &CompareShortBE(patch_position offset, const unsigned short with);
 	const ternary::Ternary &CompareSubString(patch_position offset, const std::string &with) const;
 protected:
-	void AddPatch(const Patch *p);
+	void AddPatch(Patch *p);
 	void AddNewPatch(
 			const patch_position begin,
 			const patch_position length,

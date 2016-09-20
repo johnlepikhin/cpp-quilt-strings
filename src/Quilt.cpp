@@ -34,11 +34,17 @@ Quilt::Quilt()
 {
 	Length = 0;
 	CoveredSize = 0;
+	CachedPatch = NULL;
+	CachedPatchBegin = 0xffffffff;
+	CachedPatchEnd = 0xffffffff;
 }
 
 Quilt::Quilt(const patch_position length, const patch_position coveredSize)
 	: Length(length)
 	, CoveredSize(coveredSize)
+	, CachedPatch(NULL)
+	, CachedPatchBegin(0xffffffff)
+	, CachedPatchEnd(0xffffffff)
 {
 
 }
@@ -55,7 +61,7 @@ Quilt::~Quilt()
 	}
 }
 
-void Quilt::AddPatch(const Patch *p)
+void Quilt::AddPatch(Patch *p)
 {
 	Data.push_back(p);
 }
@@ -128,7 +134,7 @@ std::string *Quilt::GetSubStringOrFail(const patch_position offset, const patch_
 	}
 }
 
-const ternary::Ternary &Quilt::CompareChar(const patch_position offset, const unsigned char with) const
+const ternary::Ternary &Quilt::CompareChar(const patch_position offset, const unsigned char with)
 {
 	const Patch *p = GetPatch(offset);
 	if (p) {
@@ -142,7 +148,7 @@ const ternary::Ternary &Quilt::CompareChar(const patch_position offset, const un
 	return (ternary::Unknown);
 }
 
-const ternary::Ternary &Quilt::CompareShortBE(const patch_position offset, const unsigned short with) const
+const ternary::Ternary &Quilt::CompareShortBE(const patch_position offset, const unsigned short with)
 {
 	const Patch *p0 = GetPatch(offset);
 	const Patch *p1 = GetPatch(offset+1);
@@ -159,7 +165,7 @@ const ternary::Ternary &Quilt::CompareShortBE(const patch_position offset, const
 	}
 }
 
-const ternary::Ternary &Quilt::CompareShortLE(const patch_position offset, const unsigned short with) const
+const ternary::Ternary &Quilt::CompareShortLE(const patch_position offset, const unsigned short with)
 {
 	const Patch *p0 = GetPatch(offset);
 	const Patch *p1 = GetPatch(offset+1);

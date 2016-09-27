@@ -199,22 +199,29 @@ const ternary::Ternary &Quilt::CompareSubString(patch_position offset, const std
 	}
 }
 
-QuiltSnippet::QuiltSnippet(const std::string *data)
-	: Quilt(data->length(), data->length())
+Quilt::Quilt(const std::string *data)
+	: Length(data->length())
+	, CoveredSize(data->length())
+	, CachedPatch(NULL)
+	, CachedPatchBegin(0xffffffff)
+	, CachedPatchEnd(0xffffffff)
 {
 	PatchContent *content = new PatchContent(data);
 	AddNewPatch(0, data->length(), content, 0);
 }
 
-QuiltSnippet::QuiltSnippet(const std::string *data, const patch_position length)
-	: Quilt(length, data->length())
+Quilt::Quilt(const std::string *data, const patch_position length)
+	: Length(length)
+	, CoveredSize(data->length())
+	, CachedPatch(NULL)
+	, CachedPatchBegin(0xffffffff)
+	, CachedPatchEnd(0xffffffff)
 {
 	PatchContent *content = new PatchContent(data);
 	AddNewPatch(0, data->length(), content, 0);
 }
 
-
-void QuiltCut::Cut(const Quilt *origin, const patch_position offset, const patch_position length)
+void Quilt::Cut(const Quilt *origin, const patch_position offset, const patch_position length)
 {
 	patch_position cut_endpos = offset+length;
 
@@ -263,31 +270,37 @@ void QuiltCut::Cut(const Quilt *origin, const patch_position offset, const patch
 	}
 }
 
-QuiltCut::QuiltCut(const Quilt *origin, const patch_position offset, const patch_position length)
-	: Quilt(length, 0)
+Quilt::Quilt(const Quilt *origin, const patch_position offset, const patch_position length)
+	: Length(length)
+	, CoveredSize(0)
+	, CachedPatch(NULL)
+	, CachedPatchBegin(0xffffffff)
+	, CachedPatchEnd(0xffffffff)
 {
 	this->Cut(origin, offset, length);
 }
 
-QuiltCut::QuiltCut(const Quilt *origin, const patch_position offset)
+Quilt::Quilt(const Quilt *origin, const patch_position offset)
+	: Length(origin->CoveredSize-offset)
+	, CoveredSize(0)
+	, CachedPatch(NULL)
+	, CachedPatchBegin(0xffffffff)
+	, CachedPatchEnd(0xffffffff)
 {
 	patch_position length = origin->CoveredSize-offset;
 	this->Cut(origin, offset, length);
 }
 
-QuiltSew::QuiltSew()
+Quilt::Quilt(const patch_position length)
+	: Length(length)
+	, CoveredSize(0)
+	, CachedPatch(NULL)
+	, CachedPatchBegin(0xffffffff)
+	, CachedPatchEnd(0xffffffff)
 {
-	Length = 0;
-	CoveredSize = 0;
 }
 
-QuiltSew::QuiltSew(const patch_position length)
-{
-	Length = length;
-	CoveredSize = 0;
-}
-
-void QuiltSew::Sew(const Quilt *origin, const patch_position offset, const bool resize)
+void Quilt::Sew(const Quilt *origin, const patch_position offset, const bool resize)
 {
 	for (quilt::const_iterator it = origin->Data.begin(); it != origin->Data.end(); ++it) {
 		AddNewPatch((*it)->Begin+offset, (*it)->Length, (*it)->Data, (*it)->DataBegin);
@@ -299,7 +312,7 @@ void QuiltSew::Sew(const Quilt *origin, const patch_position offset, const bool 
 	CoveredSize += origin->CoveredSize;
 }
 
-void QuiltSew::SewWithHole(const Quilt *origin, const patch_position offset, const patch_position length)
+void Quilt::SewWithHole(const Quilt *origin, const patch_position offset, const patch_position length)
 {
 	for (quilt::const_iterator it = origin->Data.begin(); it != origin->Data.end(); ++it) {
 		AddNewPatch((*it)->Begin+offset, (*it)->Length, (*it)->Data, (*it)->DataBegin);

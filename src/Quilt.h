@@ -103,6 +103,19 @@ public:
 	Quilt();
 	Quilt(const patch_position length, const patch_position coveredSize);
 
+	// construct from string
+	Quilt(const std::string *data);
+	Quilt(const std::string *data, const patch_position length);
+
+	// cut origin
+	Quilt(const Quilt *origin, const patch_position offset, const patch_position length);
+	Quilt(const Quilt *origin, const patch_position offset);
+
+	// sew
+	Quilt(const patch_position length);
+	void Sew(const Quilt *origin, const patch_position offset, const bool resize);
+	void SewWithHole(const Quilt *origin, const patch_position offset, const patch_position length);
+
 	~Quilt();
 
 	Patch *GetPatch(patch_position offset)
@@ -156,41 +169,14 @@ public:
 	const ternary::Ternary &CompareShortLE(patch_position offset, const unsigned short with);
 	const ternary::Ternary &CompareShortBE(patch_position offset, const unsigned short with);
 	const ternary::Ternary &CompareSubString(patch_position offset, const std::string &with) const;
-protected:
+private:
 	void AddPatch(Patch *p);
 	void AddNewPatch(
 			const patch_position begin,
 			const patch_position length,
 			PatchContent *data,
 			const patch_position data_begin);
-};
-
-//lint -esym(1712,QuiltSnippet)
-//lint -esym(1509,QuiltSnippet)
-class QuiltSnippet : public Quilt {
-public:
-	QuiltSnippet(const std::string *data);
-	QuiltSnippet(const std::string *data, const patch_position length);
-};
-
-//lint -esym(1712,QuiltCut)
-//lint -esym(1509,QuiltCut)
-class QuiltCut : public Quilt {
-public:
-	QuiltCut(const Quilt *origin, const patch_position offset, const patch_position length);
-	QuiltCut(const Quilt *origin, const patch_position offset);
-private:
 	void Cut(const Quilt *origin, const patch_position offset, const patch_position length);
-};
-
-//lint -esym(1712,QuiltSew)
-//lint -esym(1509,QuiltSew)
-class QuiltSew : public Quilt {
-public:
-	QuiltSew();
-	QuiltSew(const patch_position length);
-	void Sew(const Quilt *origin, const patch_position offset, const bool resize);
-	void SewWithHole(const Quilt *origin, const patch_position offset, const patch_position length);
 };
 
 #endif /* SRC_QUILT_H_ */

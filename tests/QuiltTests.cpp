@@ -58,7 +58,7 @@ TEST(snippetTest, HandlesGetSubString) {
 }
 
 TEST(cutTest, HandlesNormalCut) {
-	Quilt *q_cut = new QuiltCut(quilt1, 5, 10);
+	Quilt *q_cut = new Quilt(quilt1, 5, 10);
 	EXPECT_EQ(q_cut->GetCharOrFail(0), '5');
 	EXPECT_EQ(q_cut->GetCharOrFail(4), '9');
 	EXPECT_THROW(q_cut->GetCharOrFail(10), NoDataHere);
@@ -67,19 +67,21 @@ TEST(cutTest, HandlesNormalCut) {
 }
 
 TEST(cutTest, HandlesCutToEnd) {
-	Quilt *q_cut = new QuiltCut(quilt1, 5);
+	Quilt *q_cut = new Quilt(quilt1, 5);
 	EXPECT_EQ(q_cut->GetCharOrFail(0), '5');
 	EXPECT_EQ(q_cut->GetCharOrFail(4), '9');
 	EXPECT_THROW(q_cut->GetCharOrFail(10), NoDataHere);
+
+	delete q_cut;
 }
 
 TEST(cutTest, HandlesOutOfRangeCut) {
-	Quilt q_cut = QuiltCut(quilt1, 200, 10);
+	Quilt q_cut = Quilt(quilt1, 200, 10);
 	EXPECT_THROW(q_cut.GetCharOrFail(0), NoDataHere);
 }
 
 TEST(cutTest, HandlesSubString) {
-	const Quilt &q_cut = QuiltCut(quilt1, 5, 10);
+	const Quilt &q_cut = Quilt(quilt1, 5, 10);
 
 	std::string *r;
 
@@ -107,9 +109,9 @@ TEST(cutTest, HandlesSubString) {
 }
 
 TEST(sewTest, HandlesNormalSew) {
-	Quilt *q_cut1 = new QuiltCut(quilt1, 5, 10);
-	Quilt *q_cut2 = new QuiltCut(quilt1, 7, 10);
-	QuiltSew q_sew = QuiltSew(20);
+	Quilt *q_cut1 = new Quilt(quilt1, 5, 10);
+	Quilt *q_cut2 = new Quilt(quilt1, 7, 10);
+	Quilt q_sew = Quilt(20);
 	q_sew.Sew(q_cut1, 0, false);
 	q_sew.Sew(q_cut2, 10, false);
 
@@ -125,9 +127,9 @@ TEST(sewTest, HandlesNormalSew) {
 }
 
 TEST(sewTest, HandlesResize) {
-	Quilt *q_cut1 = new QuiltCut(quilt1, 5, 10);
-	Quilt *q_cut2 = new QuiltCut(quilt1, 7, 10);
-	QuiltSew q_sew = QuiltSew(0);
+	Quilt *q_cut1 = new Quilt(quilt1, 5, 10);
+	Quilt *q_cut2 = new Quilt(quilt1, 7, 10);
+	Quilt q_sew = Quilt((const patch_position)0);
 
 	q_sew.Sew(q_cut1, 0, false);
 	EXPECT_EQ(q_sew.Length, 0);
@@ -142,9 +144,9 @@ TEST(sewTest, HandlesResize) {
 	delete q_cut2;
 }
 TEST(sewTest, HandlesGetSubString) {
-	Quilt *q_cut1 = new QuiltCut(quilt1, 0, 5);
-	Quilt *q_cut2 = new QuiltCut(quilt1, 5, 5);
-	QuiltSew q_sew = QuiltSew(10);
+	Quilt *q_cut1 = new Quilt(quilt1, 0, 5);
+	Quilt *q_cut2 = new Quilt(quilt1, 5, 5);
+	Quilt q_sew = Quilt(10);
 	q_sew.Sew(q_cut1, 0, false);
 	q_sew.Sew(q_cut2, 5, false);
 

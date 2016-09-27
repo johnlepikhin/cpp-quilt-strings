@@ -3,7 +3,7 @@
 
 int main(int argc, char **argv) {
 	quilt_data1 = new std::string("0123456789");
-	quilt1 = new QuiltSnippet(quilt_data1);
+	quilt1 = new Quilt(quilt_data1);
 
 	::testing::InitGoogleTest(&argc, argv);
 

@@ -4,8 +4,8 @@
 
 #include "shared.h"
 
-std::string *quilt_data1;
-Quilt *quilt1;
+std::shared_ptr<const std::string> quilt_data1(new std::string("0123456789"));
+std::shared_ptr<Quilt> quilt1(new Quilt(quilt_data1));
 
 TEST(snippetTest, HandlesSimpleCreate) {
 	EXPECT_EQ(quilt1->GetCharOrFail(0), '0');
@@ -58,12 +58,10 @@ TEST(snippetTest, HandlesGetSubString) {
 }
 
 TEST(cutTest, HandlesNormalCut) {
-	Quilt *q_cut = new Quilt(quilt1, 5, 10);
+	std::shared_ptr<Quilt> q_cut(new Quilt(quilt1, 5, 10));
 	EXPECT_EQ(q_cut->GetCharOrFail(0), '5');
 	EXPECT_EQ(q_cut->GetCharOrFail(4), '9');
 	EXPECT_THROW(q_cut->GetCharOrFail(10), NoDataHere);
-
-	delete q_cut;
 }
 
 TEST(cutTest, HandlesCutToEnd) {
@@ -109,82 +107,74 @@ TEST(cutTest, HandlesSubString) {
 }
 
 TEST(sewTest, HandlesNormalSew) {
-	Quilt *q_cut1 = new Quilt(quilt1, 5, 10);
-	Quilt *q_cut2 = new Quilt(quilt1, 7, 10);
-	Quilt q_sew = Quilt(20);
-	q_sew.Sew(q_cut1, 0, false);
-	q_sew.Sew(q_cut2, 10, false);
+	std::shared_ptr<Quilt> q_cut1(new Quilt(quilt1, 5, 10));
+	std::shared_ptr<Quilt> q_cut2(new Quilt(quilt1, 7, 10));
+	std::shared_ptr<Quilt> q_sew(new Quilt(20));
+	q_sew->Sew(q_cut1, 0, false);
+	q_sew->Sew(q_cut2, 10, false);
 
-	delete q_cut1;
-	delete q_cut2;
-
-	EXPECT_EQ(q_sew.GetCharOrFail(0), '5');
-	EXPECT_EQ(q_sew.GetCharOrFail(4), '9');
-	EXPECT_THROW(q_sew.GetCharOrFail(5), NoDataHere);
-	EXPECT_EQ(q_sew.GetCharOrFail(10), '7');
-	EXPECT_EQ(q_sew.GetCharOrFail(12), '9');
-	EXPECT_THROW(q_sew.GetCharOrFail(13), NoDataHere);
+	EXPECT_EQ(q_sew->GetCharOrFail(0), '5');
+	EXPECT_EQ(q_sew->GetCharOrFail(4), '9');
+	EXPECT_THROW(q_sew->GetCharOrFail(5), NoDataHere);
+	EXPECT_EQ(q_sew->GetCharOrFail(10), '7');
+	EXPECT_EQ(q_sew->GetCharOrFail(12), '9');
+	EXPECT_THROW(q_sew->GetCharOrFail(13), NoDataHere);
 }
 
 TEST(sewTest, HandlesResize) {
-	Quilt *q_cut1 = new Quilt(quilt1, 5, 10);
-	Quilt *q_cut2 = new Quilt(quilt1, 7, 10);
-	Quilt q_sew = Quilt((const patch_position)0);
+	std::shared_ptr<Quilt> q_cut1(new Quilt(quilt1, 5, 10));
+	std::shared_ptr<Quilt> q_cut2(new Quilt(quilt1, 7, 10));
+	std::shared_ptr<Quilt> q_sew(new Quilt((const patch_position)0));
 
-	q_sew.Sew(q_cut1, 0, false);
-	EXPECT_EQ(q_sew.Length, 0);
+	q_sew->Sew(q_cut1, 0, false);
+	EXPECT_EQ(q_sew->Length, 0);
 
-	q_sew.Sew(q_cut1, 0, true);
-	EXPECT_EQ(q_sew.Length, 5);
+	q_sew->Sew(q_cut1, 0, true);
+	EXPECT_EQ(q_sew->Length, 5);
 
-	q_sew.SewWithHole(q_cut2, 10000, 10);
-	EXPECT_EQ(q_sew.Length, 10010);
-
-	delete q_cut1;
-	delete q_cut2;
+	q_sew->SewWithHole(q_cut2, 10000, 10);
+	EXPECT_EQ(q_sew->Length, 10010);
 }
-TEST(sewTest, HandlesGetSubString) {
-	Quilt *q_cut1 = new Quilt(quilt1, 0, 5);
-	Quilt *q_cut2 = new Quilt(quilt1, 5, 5);
-	Quilt q_sew = Quilt(10);
-	q_sew.Sew(q_cut1, 0, false);
-	q_sew.Sew(q_cut2, 5, false);
 
-	delete q_cut1;
-	delete q_cut2;
+TEST(sewTest, HandlesGetSubString) {
+	std::shared_ptr<Quilt> q_cut1(new Quilt(quilt1, 0, 5));
+	std::shared_ptr<Quilt> q_cut2(new Quilt(quilt1, 5, 5));
+	std::shared_ptr<Quilt> q_sew(new Quilt(10));
+	q_sew->Sew(q_cut1, 0, false);
+	q_sew->Sew(q_cut2, 5, false);
 
 	std::string *r;
 
-	r = q_sew.GetSubStringOrFail(0, 0);
+	r = q_sew->GetSubStringOrFail(0, 0);
 	EXPECT_STREQ(r->c_str(), "");
 	delete r;
 
-	r = q_sew.GetSubStringOrFail(0, 1);
+	r = q_sew->GetSubStringOrFail(0, 1);
 	EXPECT_STREQ(r->c_str(), "0");
 	delete r;
 
-	r = q_sew.GetSubStringOrFail(0, 3);
+	r = q_sew->GetSubStringOrFail(0, 3);
 	EXPECT_STREQ(r->c_str(), "012");
 	delete r;
 
-	r = q_sew.GetSubStringOrFail(1, 8);
+	r = q_sew->GetSubStringOrFail(1, 8);
 	EXPECT_STREQ(r->c_str(), "12345678");
 	delete r;
 
-	r = q_sew.GetSubStringOrFail(0, 10);
+	r = q_sew->GetSubStringOrFail(0, 10);
 	EXPECT_STREQ(r->c_str(), "0123456789");
 	delete r;
 
-	r = q_sew.GetSubStringOrFail(5, 5);
+	r = q_sew->GetSubStringOrFail(5, 5);
 	EXPECT_STREQ(r->c_str(), "56789");
 	delete r;
 
-	r = q_sew.GetSubStringOrFail(5, 3);
+	r = q_sew->GetSubStringOrFail(5, 3);
 	EXPECT_STREQ(r->c_str(), "567");
 	delete r;
 
-	EXPECT_THROW(q_sew.GetSubStringOrFail(0, 11), NoDataHere);
-	EXPECT_THROW(q_sew.GetSubStringOrFail(100, 11), NoDataHere);
+	EXPECT_THROW(q_sew->GetSubStringOrFail(0, 11), NoDataHere);
+	EXPECT_THROW(q_sew->GetSubStringOrFail(100, 11), NoDataHere);
 }
 
 TEST(quiltTest, HandlesCompareChar) {

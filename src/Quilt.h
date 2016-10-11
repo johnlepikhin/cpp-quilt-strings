@@ -113,7 +113,7 @@ public:
 			}
 		}
 
-		return (NULL);
+		return (std::shared_ptr<Patch>(nullptr));
 	}
 
 	inline unsigned char GetCharOrFail(patch_position offset)
@@ -143,6 +143,7 @@ public:
 	}
 
 	std::string *GetSubStringOrFail(const patch_position offset, const patch_position size) const;
+	std::string *GetMaxSubString(const patch_position offset, const patch_position size);
 	void CopyBytesOrFail(char *buffer, const patch_position offset, const patch_position size) const;
 
 	const ternary::Ternary &CompareChar(patch_position offset, const unsigned char with);

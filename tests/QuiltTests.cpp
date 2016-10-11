@@ -177,6 +177,52 @@ TEST(sewTest, HandlesGetSubString) {
 	EXPECT_THROW(q_sew->GetSubStringOrFail(100, 11), NoDataHere);
 }
 
+TEST(sewTest, HandlesGetMaxSubString) {
+	std::shared_ptr<Quilt> q_cut1(new Quilt(quilt1, 0, 5));
+	std::shared_ptr<Quilt> q_cut2(new Quilt(quilt1, 5, 5));
+	std::shared_ptr<Quilt> q_sew(new Quilt(10));
+	q_sew->Sew(q_cut1, 0, false);
+	q_sew->Sew(q_cut2, 5, false);
+
+	std::string *r;
+
+	r = q_sew->GetMaxSubString(0, 0);
+	EXPECT_STREQ(r->c_str(), "01234");
+	delete r;
+
+	r = q_sew->GetMaxSubString(0, 1);
+	EXPECT_STREQ(r->c_str(), "01234");
+	delete r;
+
+	r = q_sew->GetMaxSubString(0, 3);
+	EXPECT_STREQ(r->c_str(), "01234");
+	delete r;
+
+	r = q_sew->GetMaxSubString(1, 8);
+	EXPECT_STREQ(r->c_str(), "123456789");
+	delete r;
+
+	r = q_sew->GetMaxSubString(0, 10);
+	EXPECT_STREQ(r->c_str(), "0123456789");
+	delete r;
+
+	r = q_sew->GetMaxSubString(5, 5);
+	EXPECT_STREQ(r->c_str(), "56789");
+	delete r;
+
+	r = q_sew->GetMaxSubString(5, 3);
+	EXPECT_STREQ(r->c_str(), "56789");
+	delete r;
+
+	r = q_sew->GetMaxSubString(0, 11);
+	EXPECT_STREQ(r->c_str(), "0123456789");
+	delete r;
+
+	r = q_sew->GetMaxSubString(100, 11);
+	EXPECT_STREQ(r->c_str(), "");
+	delete r;
+}
+
 TEST(quiltTest, HandlesCompareChar) {
 	EXPECT_EQ(quilt1->CompareChar(0, '0'), ternary::True);
 	EXPECT_EQ(quilt1->CompareChar(0, 'z'), ternary::False);

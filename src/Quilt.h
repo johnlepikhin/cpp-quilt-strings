@@ -56,7 +56,7 @@ public:
 
 	inline std::shared_ptr<Patch> Copy() const
 	{
-		return (std::shared_ptr<Patch>(new Patch(Begin, Length, Data, DataBegin)));
+		return (std::make_shared<Patch>(Begin, Length, Data, DataBegin));
 	}
 };
 

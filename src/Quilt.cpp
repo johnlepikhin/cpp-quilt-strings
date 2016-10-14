@@ -32,7 +32,7 @@ void Quilt::AddNewPatch(
 		std::shared_ptr<PatchContent> data,
 		const patch_position data_begin)
 {
-	std::shared_ptr<Patch> p(new Patch(begin, length, data, data_begin));
+	std::shared_ptr<Patch> p = std::make_shared<Patch>(begin, length, data, data_begin);
 	AddPatch(p);
 }
 
@@ -107,7 +107,7 @@ std::string *Quilt::GetMaxSubString(const patch_position offset, const patch_pos
 		while (my_lastpos <= lastpos) {
 			const std::shared_ptr<Patch> p = GetPatch(my_lastpos);
 			if (p) {
-				patch_position data_begin = p->Begin - p->DataBegin + my_lastpos;
+				patch_position data_begin = my_lastpos - p->Begin + p->DataBegin;
 				patch_position offset_in_data = data_begin-p->DataBegin;
 				patch_position copylen = p->Length-offset_in_data;
 				if (r_lastpos+copylen > r->size()) {
@@ -125,7 +125,6 @@ std::string *Quilt::GetMaxSubString(const patch_position offset, const patch_pos
 		r->resize(r_lastpos);
 		return (r);
 	} catch (...) {
-		std::cout << "Fail!!!\n";
 		delete r;
 		throw;
 	}
@@ -203,7 +202,7 @@ Quilt::Quilt(std::shared_ptr<const std::string> data)
 	, CachedPatchBegin(0xffffffff)
 	, CachedPatchEnd(0xffffffff)
 {
-	std::shared_ptr<PatchContent> content(new PatchContent(data));
+	std::shared_ptr<PatchContent> content = std::make_shared<PatchContent>(data);
 	AddNewPatch(0, data->length(), content, 0);
 }
 
@@ -214,7 +213,7 @@ Quilt::Quilt(std::shared_ptr<const std::string> data, const patch_position lengt
 	, CachedPatchBegin(0xffffffff)
 	, CachedPatchEnd(0xffffffff)
 {
-	std::shared_ptr<PatchContent> content(new PatchContent(data));
+	std::shared_ptr<PatchContent> content = std::make_shared<PatchContent>(data);
 	AddNewPatch(0, data->length(), content, 0);
 }
 

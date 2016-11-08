@@ -145,7 +145,6 @@ public:
 	std::string *GetSubStringOrFail(const patch_position offset, const patch_position size) const;
 	std::string *GetMaxSubString(const patch_position offset, const patch_position size);
 	void CopyBytesOrFail(char *buffer, const patch_position offset, const patch_position size) const;
-
 	const ternary::Ternary &CompareChar(patch_position offset, const unsigned char with);
 	const ternary::Ternary &CompareShortLE(patch_position offset, const unsigned short with);
 	const ternary::Ternary &CompareShortBE(patch_position offset, const unsigned short with);

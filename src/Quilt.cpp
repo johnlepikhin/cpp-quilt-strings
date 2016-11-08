@@ -36,7 +36,7 @@ void Quilt::AddNewPatch(
 	AddPatch(p);
 }
 
-void Quilt::CopyBytesOrFail(char *buffer, patch_position offset, patch_position size) const
+void Quilt::CopyBytesOrFail(char *buffer, const patch_position offset, const patch_position size) const
 {
 	if (0 == size) {
 		return;

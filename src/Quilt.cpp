@@ -94,38 +94,35 @@ std::string *Quilt::GetSubStringOrFail(const patch_position offset, const patch_
 	}
 }
 
-std::string *Quilt::GetMaxSubString(const patch_position offset, const patch_position size)
+std::string Quilt::GetMaxSubString(const patch_position offset, const patch_position size)
 {
-	std::string *r = new std::string();
+	std::string r;
 	patch_position my_lastpos = offset;
 	patch_position r_lastpos = 0;
 	patch_position lastpos = offset+size;
 
 	try {
-		r->resize(size);
-
 		while (my_lastpos <= lastpos) {
 			const std::shared_ptr<Patch> p = GetPatch(my_lastpos);
 			if (p) {
 				patch_position data_begin = my_lastpos - p->Begin + p->DataBegin;
 				patch_position offset_in_data = data_begin-p->DataBegin;
 				patch_position copylen = p->Length-offset_in_data;
-				if (r_lastpos+copylen > r->size()) {
-					r->resize(r_lastpos+copylen);
+				if (r_lastpos+copylen > r.size()) {
+					r.resize(r_lastpos+copylen);
 				}
-				p->Data->Content->copy(&(r->at(r_lastpos)), copylen, data_begin);
+				p->Data->Content->copy(&(r.at(r_lastpos)), copylen, data_begin);
 				my_lastpos+=copylen;
 				r_lastpos+=copylen;
 			} else {
-				r->resize(r_lastpos);
+				r.resize(r_lastpos);
 				return (r);
 			}
 		}
 
-		r->resize(r_lastpos);
+		r.resize(r_lastpos);
 		return (r);
 	} catch (...) {
-		delete r;
 		throw;
 	}
 }

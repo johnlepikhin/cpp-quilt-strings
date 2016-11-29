@@ -42,35 +42,37 @@ void Quilt::CopyBytesOrFail(char *buffer, const patch_position offset, const pat
 		return;
 	}
 
-	patch_position end_offset = offset + size;
+	patch_position end_offset_in_quilt = offset + size;
 
 	patch_position copied = 0;
 
-	for (quilt::const_iterator it = Data.begin(); it != Data.end(); ++it) {
-		patch_position end_patch_offset = (*it)->Begin + (*it)->Length;
+	for (quilt::const_iterator it = Data.begin(); it != Data.end() && copied != size; ++it) {
+		patch_position end_offset_in_patch = (*it)->Begin + (*it)->Length;
 		patch_position offset_in_patch = offset-(*it)->Begin;
-		std::shared_ptr<const std::string> data = (*it)->Data->Content;
-		if ((*it)->Begin <= offset && offset < end_patch_offset) {
-			// substring begins inside this patch
-			if ((*it)->Begin <= end_offset && end_offset < end_patch_offset) {
-				// substring is just a part of this patch
-				data->copy(buffer, size, offset_in_patch+(*it)->DataBegin);
-				return;
-			} else {
-				patch_position sublen = (*it)->Length-offset_in_patch;
-				data->copy(buffer, sublen, offset_in_patch+(*it)->DataBegin);
-				copied += sublen;
-			}
-		} else if (offset < (*it)->Begin) {
-			if (end_offset >= end_patch_offset) {
-				// all bytes of this patch are part of substring
-				data->copy(buffer+(*it)->Begin-offset, (*it)->Length, (*it)->DataBegin);
-				copied += (*it)->Length;
-			} else {
-				// substring ends in this patch
-				patch_position sublen = end_offset-(*it)->Begin;
-				data->copy(buffer+(*it)->Begin-offset, sublen, (*it)->DataBegin);
-				copied += sublen;
+		if ((*it)->Data != nullptr && (*it)->Data->Content != nullptr) {
+			std::shared_ptr<const std::string> data = (*it)->Data->Content;
+			if ((*it)->Begin <= offset && offset < end_offset_in_patch) {
+				// substring begins inside this patch
+				if ((*it)->Begin <= end_offset_in_quilt && end_offset_in_quilt < end_offset_in_patch) {
+					// substring is just a part of this patch
+					data->copy(buffer, size, offset_in_patch+(*it)->DataBegin);
+					return;
+				} else {
+					patch_position sublen = (*it)->Length-offset_in_patch;
+					data->copy(buffer, sublen, offset_in_patch+(*it)->DataBegin);
+					copied += sublen;
+				}
+			} else if (offset < (*it)->Begin) {
+				if (end_offset_in_quilt >= end_offset_in_patch) {
+					// all bytes of this patch are part of substring
+					data->copy(buffer+(*it)->Begin-offset, (*it)->Length, (*it)->DataBegin);
+					copied += (*it)->Length;
+				} else {
+					// substring ends in this patch
+					patch_position sublen = end_offset_in_quilt-(*it)->Begin;
+					data->copy(buffer+(*it)->Begin-offset, sublen, (*it)->DataBegin);
+					copied += sublen;
+				}
 			}
 		}
 	}
@@ -80,17 +82,17 @@ void Quilt::CopyBytesOrFail(char *buffer, const patch_position offset, const pat
 	}
 }
 
-std::string *Quilt::GetSubStringOrFail(const patch_position offset, const patch_position size) const
+std::string Quilt::GetSubStringOrFail(const patch_position offset, const patch_position size) const
 {
-	std::string *r = new std::string();
+//	std::string *r = new std::string();
+//	r->resize(size);
+	char *buf = (char *)malloc(size);
 	try {
-		r->resize(size);
-		CopyBytesOrFail(const_cast<char *>(r->data()), offset, size);
-
-		return (r);
+		CopyBytesOrFail(buf, offset, size);
+		return (std::string(buf, size));
 	} catch (...) {
-		delete r;
-		throw;
+		free(buf);
+		return ("");
 	}
 }
 
@@ -179,12 +181,10 @@ const ternary::Ternary &Quilt::CompareSubString(patch_position offset, const std
 {
 	using namespace ternary;
 	try {
-		std::string *substr = GetSubStringOrFail(offset, with.length());
-		if (*substr == with) {
-			delete substr;
+		std::string substr = GetSubStringOrFail(offset, with.length());
+		if (substr == with) {
 			return (True);
 		} else {
-			delete substr;
 			return (False);
 		}
 	} catch (...) {

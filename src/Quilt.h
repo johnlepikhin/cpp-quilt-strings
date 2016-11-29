@@ -37,9 +37,12 @@ public:
 //lint -esym(1712,Patch)
 class Patch {
 public:
+	/// What position in Quilt represents this patch
 	const patch_position Begin;
 	const patch_position Length;
 	std::shared_ptr<PatchContent> Data;
+
+	/// Where data begins in Data
 	const patch_position DataBegin;
 	Patch(
 			const patch_position begin,
@@ -142,7 +145,7 @@ public:
 		return (r);
 	}
 
-	std::string *GetSubStringOrFail(const patch_position offset, const patch_position size) const;
+	std::string GetSubStringOrFail(const patch_position offset, const patch_position size) const;
 	std::string GetMaxSubString(const patch_position offset, const patch_position size);
 	void CopyBytesOrFail(char *buffer, const patch_position offset, const patch_position size) const;
 	const ternary::Ternary &CompareChar(patch_position offset, const unsigned char with);

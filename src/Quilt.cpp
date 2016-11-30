@@ -1,7 +1,10 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 #include "Quilt.h"
 
 #include <string>
+#include <limits>
 
 PatchContent::PatchContent(std::shared_ptr<const std::string> content)
 	: Content(content)
@@ -13,8 +16,8 @@ Quilt::Quilt()
 	Length = 0;
 	CoveredSize = 0;
 	CachedPatch = NULL;
-	CachedPatchBegin = 0xffffffff;
-	CachedPatchEnd = 0xffffffff;
+	CachedPatchBegin = std::numeric_limits<uint32_t>::max();
+	CachedPatchEnd = std::numeric_limits<uint32_t>::max();
 }
 
 Quilt::Quilt(const patch_position length, const patch_position coveredSize)
@@ -36,13 +39,13 @@ void Quilt::AddNewPatch(
 	AddPatch(p);
 }
 
-void Quilt::CopyBytesOrFail(char *buffer, const patch_position offset, const patch_position size) const
+void Quilt::CopyBytesOrFail(char *buffer, const patch_position offset, const size_t size) const
 {
 	if (0 == size) {
 		return;
 	}
 
-	patch_position end_offset_in_quilt = offset + size;
+	patch_position end_offset_in_quilt = offset + static_cast<patch_position>(size);
 
 	patch_position copied = 0;
 
@@ -82,11 +85,11 @@ void Quilt::CopyBytesOrFail(char *buffer, const patch_position offset, const pat
 	}
 }
 
-std::string Quilt::GetSubStringOrFail(const patch_position offset, const patch_position size) const
+std::string Quilt::GetSubStringOrFail(const patch_position offset, const size_t size) const
 {
 //	std::string *r = new std::string();
 //	r->resize(size);
-	char *buf = (char *)malloc(size);
+	char *buf = static_cast<char *>(malloc(size));
 	try {
 		CopyBytesOrFail(buf, offset, size);
 		return (std::string(buf, size));
@@ -96,7 +99,7 @@ std::string Quilt::GetSubStringOrFail(const patch_position offset, const patch_p
 	}
 }
 
-std::string Quilt::GetMaxSubString(const patch_position offset, const patch_position size)
+std::string Quilt::GetMaxSubString(const patch_position offset, const size_t size)
 {
 	std::string r;
 	patch_position my_lastpos = offset;
@@ -129,11 +132,11 @@ std::string Quilt::GetMaxSubString(const patch_position offset, const patch_posi
 	}
 }
 
-const ternary::Ternary &Quilt::CompareChar(const patch_position offset, const unsigned char with)
+const ternary::Ternary Quilt::CompareChar(const patch_position offset, const unsigned char with)
 {
 	const std::shared_ptr<Patch> p = GetPatch(offset);
 	if (p) {
-		if ((unsigned char)p->Data->Content->at((offset-p->Begin)+p->DataBegin) == with) {
+		if (static_cast<unsigned char>(p->Data->Content->at((offset-p->Begin)+p->DataBegin)) == with) {
 			return (ternary::True);
 		} else {
 			return (ternary::False);
@@ -143,7 +146,7 @@ const ternary::Ternary &Quilt::CompareChar(const patch_position offset, const un
 	return (ternary::Unknown);
 }
 
-const ternary::Ternary &Quilt::CompareShortBE(const patch_position offset, const unsigned short with)
+const ternary::Ternary Quilt::CompareShortBE(const patch_position offset, const unsigned short with)
 {
 	const std::shared_ptr<Patch> p0 = GetPatch(offset);
 	const std::shared_ptr<Patch> p1 = GetPatch(offset+1);
@@ -152,15 +155,15 @@ const ternary::Ternary &Quilt::CompareShortBE(const patch_position offset, const
 		return (Unknown);
 	}
 
-	if ((unsigned char)p0->Data->Content->at((offset-p0->Begin)+p0->DataBegin) == with >> 8
-			&& ((unsigned char)p1->Data->Content->at((offset+1-p1->Begin)+p1->DataBegin) & 0xf) == (with & 0xf)) {
+	if (static_cast<unsigned char>(p0->Data->Content->at((offset-p0->Begin)+p0->DataBegin)) == with >> 8
+			&& (static_cast<unsigned char>(p1->Data->Content->at((offset+1-p1->Begin)+p1->DataBegin) & 0xf)) == (with & 0xf)) {
 		return (True);
 	} else {
 		return (False);
 	}
 }
 
-const ternary::Ternary &Quilt::CompareShortLE(const patch_position offset, const unsigned short with)
+const ternary::Ternary Quilt::CompareShortLE(const patch_position offset, const unsigned short with)
 {
 	const std::shared_ptr<Patch> p0 = GetPatch(offset);
 	const std::shared_ptr<Patch> p1 = GetPatch(offset+1);
@@ -169,15 +172,15 @@ const ternary::Ternary &Quilt::CompareShortLE(const patch_position offset, const
 		return (Unknown);
 	}
 
-	if ((unsigned char)p1->Data->Content->at((offset+1-p1->Begin)+p1->DataBegin) == with >> 8
-			&& ((unsigned char)p0->Data->Content->at((offset-p0->Begin)+p0->DataBegin) & 0xf) == (with & 0xf)) {
+	if (static_cast<unsigned char>(p1->Data->Content->at((offset+1-p1->Begin)+p1->DataBegin)) == with >> 8
+			&& (static_cast<unsigned char>(p0->Data->Content->at((offset-p0->Begin)+p0->DataBegin) & 0xf)) == (with & 0xf)) {
 		return (True);
 	} else {
 		return (False);
 	}
 }
 
-const ternary::Ternary &Quilt::CompareSubString(patch_position offset, const std::string &with) const
+const ternary::Ternary Quilt::CompareSubString(patch_position offset, const std::string &with) const
 {
 	using namespace ternary;
 	try {

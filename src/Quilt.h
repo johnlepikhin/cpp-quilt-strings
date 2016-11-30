@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 #ifndef SRC_QUILT_H_
 #define SRC_QUILT_H_
@@ -26,7 +28,7 @@ public:
 	}
 };
 
-typedef unsigned long int patch_position;
+typedef unsigned long long patch_position;
 
 class PatchContent {
 public:
@@ -123,7 +125,7 @@ public:
 	{
 		const std::shared_ptr<Patch> p = GetPatch(offset);
 		if (p) {
-			return ((unsigned char)p->Data->Content->at((offset-p->Begin)+p->DataBegin));
+			return (static_cast<unsigned char>(p->Data->Content->at((offset-p->Begin)+p->DataBegin)));
 		} else {
 			throw NoDataHere();
 		}
@@ -145,13 +147,13 @@ public:
 		return (r);
 	}
 
-	std::string GetSubStringOrFail(const patch_position offset, const patch_position size) const;
-	std::string GetMaxSubString(const patch_position offset, const patch_position size);
-	void CopyBytesOrFail(char *buffer, const patch_position offset, const patch_position size) const;
-	const ternary::Ternary &CompareChar(patch_position offset, const unsigned char with);
-	const ternary::Ternary &CompareShortLE(patch_position offset, const unsigned short with);
-	const ternary::Ternary &CompareShortBE(patch_position offset, const unsigned short with);
-	const ternary::Ternary &CompareSubString(patch_position offset, const std::string &with) const;
+	std::string GetSubStringOrFail(const patch_position offset, const size_t size) const;
+	std::string GetMaxSubString(const patch_position offset, const size_t size);
+	void CopyBytesOrFail(char *buffer, const patch_position offset, const size_t size) const;
+	const ternary::Ternary CompareChar(patch_position offset, const unsigned char with);
+	const ternary::Ternary CompareShortLE(patch_position offset, const unsigned short with);
+	const ternary::Ternary CompareShortBE(patch_position offset, const unsigned short with);
+	const ternary::Ternary CompareSubString(patch_position offset, const std::string &with) const;
 private:
 	inline void AddPatch(std::shared_ptr<Patch> p)
 	{

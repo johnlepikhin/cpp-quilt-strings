@@ -1,0 +1,15 @@
+/UnitTests/
+proj_files.lnt
+.cproject
+.project
+.settings
+**/*.o
+**.d
+**.gcda
+**.gcno
+**.log
+**.a
+**/strace_out
+Debug/report.tasks
+**/perf.data
+**/*.swp

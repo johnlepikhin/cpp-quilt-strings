@@ -15,11 +15,11 @@ Ternary::Ternary(bool v)
 {
 }
 
-const bool Ternary::operator==(const Ternary &second) const {
+bool Ternary::operator==(const Ternary &second) const {
 	return (Value == second.Value);
 }
 
-const bool Ternary::operator==(bool second) const {
+bool Ternary::operator==(bool second) const {
 	if (Value == IsTrue) {
 		if (second) {
 			return (true);
@@ -111,15 +111,15 @@ const Ternary &Ternary::operator!() const {
 	}
 }
 
-const bool Ternary::ProbablyTrue() const {
+bool Ternary::ProbablyTrue() const {
 	return ((Value == IsFalse) ? false : true);
 }
 
-const bool Ternary::ProbablyFalse() const {
+bool Ternary::ProbablyFalse() const {
 	return ((Value == IsTrue) ? true : false);
 }
 
-const bool Ternary::BoolOrFail() const {
+bool Ternary::BoolOrFail() const {
 	if (Value == IsTrue) {
 		return (true);
 	} else if (Value == IsFalse) {

@@ -34,16 +34,16 @@ public:
 	const enum values Value;
 	Ternary(values v);
 	Ternary(bool v);
-	const bool operator==(const Ternary &second) const;
-	const bool operator==(bool second) const;
+	bool operator==(const Ternary &second) const;
+	bool operator==(bool second) const;
 	const Ternary &operator&&(const Ternary &second) const;
 	const Ternary &operator&&(bool second) const;
 	const Ternary &operator||(const Ternary &second) const;
 	const Ternary &operator||(bool second) const;
 	const Ternary &operator!() const;
-	const bool ProbablyTrue() const;
-	const bool ProbablyFalse() const;
-	const bool BoolOrFail() const;
+	bool ProbablyTrue() const;
+	bool ProbablyFalse() const;
+	bool BoolOrFail() const;
 };
 
 const Ternary True = Ternary(IsTrue);

@@ -13,3 +13,5 @@ proj_files.lnt
 Debug/report.tasks
 **/perf.data
 **/*.swp
+/Debug/
+/Release/
